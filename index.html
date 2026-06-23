@@ -463,7 +463,7 @@
     // GENERAL MOTION
     gsap.from('.manifesto h2',{y:100,opacity:0,duration:1.1,scrollTrigger:{trigger:'.manifesto',start:'top 70%'}});
     gsap.from('.manifesto-line',{scaleX:0,duration:1.3,scrollTrigger:{trigger:'.manifesto-line',start:'top 90%'}});
-    gsap.from('.model-option',{x:-50,opacity:0,stagger:.08,scrollTrigger:{trigger:'.model-list',start:'top 70%'}});
+    gsap.fromTo('.model-option',{x:-50,opacity:0},{x:0,opacity:1,stagger:.08,duration:0.8,scrollTrigger:{trigger:'.models',start:'top 80%'}});
     const rail=document.querySelector('.material-rail');
     gsap.to(rail,{x:()=>-(rail.scrollWidth-innerWidth+34),ease:'none',scrollTrigger:{trigger:'.materials',start:'top top',end:()=>'+='+(rail.scrollWidth-innerWidth),pin:true,scrub:1,invalidateOnRefresh:true}});
     gsap.from('.process-item',{y:90,opacity:0,stagger:.1,scrollTrigger:{trigger:'.conveyor',start:'top 72%'}});
