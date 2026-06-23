@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ece3d1" />
+  <title>ZENPOD — Modular Cabin & Prefab House</title>
+  <meta name="description" content="ZENPOD thiết kế và thi công cabin lắp ghép, villa module và không gian prefab cao cấp tại Việt Nam." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sand:#ece3d1;
+      --paper:#f5efe3;
+      --forest:#19352f;
+      --forest-2:#23483f;
+      --clay:#b64f36;
+      --charcoal:#171b19;
+      --silver:#b9beb7;
+      --line:rgba(23,27,25,.16);
+      --muted:rgba(23,27,25,.64);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:auto;background:var(--sand)}
+    body{font-family:"DM Sans",sans-serif;background:var(--sand);color:var(--charcoal);overflow-x:hidden}
+    body.loading{overflow:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    .loader{position:fixed;inset:0;z-index:9999;background:var(--forest);display:grid;place-items:center;color:var(--paper);transition:opacity .7s ease,visibility .7s ease}
+    .loader.hide{opacity:0;visibility:hidden}
+    .loader-inner{display:grid;gap:20px;text-align:center}
+    .loader-mark{font-family:"Playfair Display",serif;font-size:clamp(56px,10vw,120px);line-height:.8;font-style:italic}
+    .loader-bar{width:min(300px,70vw);height:1px;background:rgba(255,255,255,.2);overflow:hidden}
+    .loader-bar span{display:block;height:100%;width:0;background:#fff}
+    .loader small{font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.65}
+
+    .noise{position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+
+    header{position:fixed;top:0;left:0;right:0;z-index:80;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:22px 34px;color:var(--paper);mix-blend-mode:difference;pointer-events:none}
+    header>*{pointer-events:auto}
+    .logo{font:600 22px/1 "Manrope",sans-serif;letter-spacing:-.05em}
+    .logo span{font-family:"Playfair Display",serif;font-style:italic;font-weight:500}
+    .nav{display:flex;gap:30px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+    .header-cta{justify-self:end;border:1px solid currentColor;border-radius:100px;padding:12px 18px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;transition:.3s}
+    .header-cta:hover{background:currentColor;color:var(--charcoal)}
+
+    .hero{position:relative;height:100svh;min-height:720px;background:var(--forest);color:var(--paper);overflow:hidden}
+    #heroCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+    .hero-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(8,21,18,.88) 0%,rgba(8,21,18,.26) 35%,rgba(8,21,18,.06) 62%,rgba(8,21,18,.55) 100%),linear-gradient(0deg,rgba(7,16,14,.65),transparent 42%)}
+    .hero-grid{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:1fr auto;padding:132px 34px 34px;pointer-events:none}
+    .hero-copy{grid-column:1/7;align-self:center;pointer-events:auto}
+    .eyebrow{display:flex;align-items:center;gap:12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:26px}
+    .eyebrow:before{content:"";width:38px;height:1px;background:currentColor}
+    .hero h1{font:500 clamp(66px,8.8vw,146px)/.79 "Manrope",sans-serif;letter-spacing:-.085em;text-transform:uppercase;max-width:900px}
+    .hero h1 em{display:block;font-family:"Playfair Display",serif;font-weight:500;text-transform:none;letter-spacing:-.045em;color:#dacdb8}
+    .hero-bottom{grid-column:1/13;grid-row:2;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.26);padding-top:18px;align-items:end;pointer-events:auto}
+    .hero-lead{max-width:480px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.72)}
+    .stat{border-left:1px solid rgba(255,255,255,.22);padding-left:20px}
+    .stat b{display:block;font:500 24px/1 "Manrope";margin-bottom:8px}
+    .stat span{font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.58}
+    .hero-orbit-label{position:absolute;right:7vw;top:24%;z-index:4;width:128px;height:128px;border:1px solid rgba(255,255,255,.35);border-radius:50%;display:grid;place-items:center;text-align:center;font-size:9px;letter-spacing:.18em;text-transform:uppercase;animation:spin 14s linear infinite}
+    .hero-orbit-label:before{content:"";position:absolute;inset:12px;border:1px dashed rgba(255,255,255,.18);border-radius:50%}
+    .hero-orbit-label span{max-width:70px;animation:spinBack 14s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes spinBack{to{transform:rotate(-360deg)}}
+    .scroll-cue{position:absolute;z-index:4;right:34px;bottom:36px;writing-mode:vertical-rl;font-size:9px;letter-spacing:.22em;text-transform:uppercase;opacity:.62}
+
+    .manifesto{position:relative;padding:150px 34px 130px;background:var(--paper);overflow:hidden}
+    .section-tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;gap:14px;align-items:center}
+    .section-tag:before{content:"";width:28px;height:1px;background:currentColor}
+    .manifesto-grid{margin-top:84px;display:grid;grid-template-columns:4fr 8fr;gap:60px}
+    .manifesto-side{font-size:12px;line-height:1.7;max-width:250px;color:var(--muted)}
+    .manifesto h2{font:500 clamp(48px,7vw,112px)/1.15 "Manrope";letter-spacing:-.07em;text-transform:uppercase}
+    .manifesto h2 span{font-family:"Playfair Display";font-style:italic;text-transform:none;color:var(--clay)}
+    .manifesto-line{height:1px;background:var(--line);margin-top:84px;transform-origin:left}
+
+    .explode{position:relative;height:420vh;background:var(--charcoal);color:var(--paper)}
+    .explode-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+    #explodeCanvas{position:absolute;inset:0;width:100%;height:100%}
+    .explode-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,13,12,.88),transparent 44%,rgba(10,13,12,.3));pointer-events:none}
+    .explode-copy{position:absolute;left:34px;top:50%;transform:translateY(-50%);z-index:2;width:min(430px,38vw)}
+    .explode-copy h2{font:500 clamp(54px,6vw,98px)/1.15 "Manrope";letter-spacing:-.08em;text-transform:uppercase;margin:28px 0 24px}
+    .explode-copy p{font-size:14px;line-height:1.7;color:rgba(255,255,255,.62);max-width:340px}
+    .explode-index{margin-top:54px;display:grid;gap:12px}
+    .explode-step{display:grid;grid-template-columns:34px 1fr auto;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.16);opacity:.34;transition:.4s}
+    .explode-step.active{opacity:1;transform:translateX(8px)}
+    .explode-step small{font-size:9px;letter-spacing:.16em}
+    .explode-step b{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.12em}
+    .explode-step span{font-family:"Playfair Display";font-style:italic;font-size:12px;color:#c7b89e}
+    .explode-meter{position:absolute;right:34px;top:50%;transform:translateY(-50%);z-index:2;height:56vh;width:1px;background:rgba(255,255,255,.18)}
+    .explode-meter span{display:block;width:3px;height:0;background:var(--clay);margin-left:-1px}
+
+    .models{background:var(--sand);padding:140px 34px 170px;overflow:hidden}
+    .models-head{display:grid;grid-template-columns:7fr 5fr;align-items:end;gap:60px;margin-bottom:90px}
+    .models h2{font:500 clamp(64px,9vw,148px)/.78 "Manrope";letter-spacing:-.09em;text-transform:uppercase}
+    .models h2 em{font-family:"Playfair Display";font-weight:500;text-transform:none;color:var(--clay)}
+    .models-intro{max-width:420px;justify-self:end;font-size:14px;line-height:1.75;color:var(--muted)}
+    .model-stage{display:grid;grid-template-columns:4fr 8fr;min-height:660px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .model-list{border-right:1px solid var(--line);padding:40px 40px 40px 0;display:flex;flex-direction:column;justify-content:center}
+    .model-option{appearance:none;border:0;background:none;text-align:left;padding:26px 12px 26px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:50px 1fr auto;align-items:center;color:var(--charcoal);transition:.35s}
+    .model-option:hover,.model-option.active{padding-left:18px;background:rgba(255,255,255,.3)}
+    .model-option small{font-size:10px;letter-spacing:.15em;color:var(--muted)}
+    .model-option strong{font:500 clamp(24px,3vw,42px)/1 "Manrope";letter-spacing:-.04em}
+    .model-option span{font:italic 15px "Playfair Display";color:var(--clay)}
+    .model-visual{position:relative;display:grid;place-items:center;overflow:hidden;background:linear-gradient(160deg,#e3dac8,#f2ecdf)}
+    #configCanvas{position:absolute;inset:0;width:100%;height:100%}
+    .model-ui{position:absolute;left:30px;right:30px;bottom:25px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .model-ui div{padding:14px 16px;border:1px solid var(--line);background:rgba(245,239,227,.78);backdrop-filter:blur(10px)}
+    .model-ui span{display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .model-ui b{font-size:13px;font-weight:500}
+
+    .materials{padding:140px 0;background:var(--forest);color:var(--paper);overflow:hidden}
+    .materials-head{padding:0 34px 70px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end}
+    .materials h2{font:500 clamp(60px,8vw,130px)/.82 "Manrope";letter-spacing:-.085em;text-transform:uppercase}
+    .materials h2 em{font-family:"Playfair Display";text-transform:none;font-weight:500;color:#d6c6ad}
+    .materials-copy{max-width:440px;justify-self:end;font-size:14px;line-height:1.75;color:rgba(255,255,255,.62)}
+    .material-rail{display:flex;width:max-content;padding-left:34px;gap:18px}
+    .material-card{position:relative;width:min(34vw,500px);height:66vh;min-height:520px;overflow:hidden;background:#223}
+    .material-card img{transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+    .material-card:hover img{transform:scale(1.06)}
+    .material-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 54%)}
+    .material-info{position:absolute;z-index:2;left:24px;right:24px;bottom:24px;border-top:1px solid rgba(255,255,255,.32);padding-top:16px;display:flex;justify-content:space-between;align-items:end}
+    .material-info h3{font:500 30px/1 "Manrope";letter-spacing:-.04em}
+    .material-info span{font-size:9px;letter-spacing:.15em;text-transform:uppercase;opacity:.68}
+
+    .process{background:var(--paper);padding:145px 34px 160px}
+    .process-head{display:grid;grid-template-columns:5fr 7fr;gap:80px;margin-bottom:90px}
+    .process h2{font:500 clamp(58px,8vw,128px)/.82 "Manrope";letter-spacing:-.085em;text-transform:uppercase}
+    .process-copy{align-self:end;font-size:14px;line-height:1.75;color:var(--muted);max-width:430px}
+    .conveyor{position:relative;border-top:1px solid var(--line);border-bottom:1px solid var(--line);height:420px;overflow:hidden}
+    .conveyor-track{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--charcoal)}
+    .conveyor-track:before,.conveyor-track:after{content:"";position:absolute;top:-8px;width:18px;height:18px;border:2px solid var(--charcoal);border-radius:50%;background:var(--paper)}
+    .conveyor-track:before{left:0}.conveyor-track:after{right:0}
+    .process-item{position:absolute;top:50%;transform:translate(-50%,-50%);width:180px;height:180px;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;text-align:center;padding:16px}
+    .process-item:nth-child(2){left:10%}.process-item:nth-child(3){left:30%}.process-item:nth-child(4){left:50%}.process-item:nth-child(5){left:70%}.process-item:nth-child(6){left:90%}
+    .process-item small{font-size:9px;letter-spacing:.16em;color:var(--clay)}
+    .process-item b{font:500 19px/1.1 "Manrope";text-transform:uppercase}
+    .process-item span{font:italic 13px "Playfair Display";color:var(--muted)}
+    .process-item .icon{width:52px;height:52px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:22px}
+
+    .projects{background:var(--sand);padding:140px 34px 150px}
+    .projects-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:70px}
+    .projects h2{font:500 clamp(58px,8vw,132px)/.82 "Manrope";letter-spacing:-.08em;text-transform:uppercase}
+    .projects-count{font:italic 20px "Playfair Display";color:var(--clay)}
+    .project-grid{display:grid;grid-template-columns:1.3fr .7fr;grid-template-rows:540px 420px;gap:18px}
+    .project{position:relative;overflow:hidden;background:#ddd}
+    .project:nth-child(1){grid-row:1/3}
+    .project img{transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+    .project:hover img{transform:scale(1.055)}
+    .project:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.68),transparent 55%)}
+    .project-meta{position:absolute;z-index:2;left:24px;right:24px;bottom:24px;color:white;display:flex;justify-content:space-between;align-items:end}
+    .project-meta h3{font:500 clamp(28px,3vw,44px)/1 "Manrope";letter-spacing:-.05em}
+    .project-meta span{font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+
+    .quote{position:relative;background:var(--clay);color:var(--paper);padding:140px 34px 40px;min-height:100vh;overflow:hidden}
+    .quote:before{content:"ZENPOD";position:absolute;right:-4vw;top:2vh;font:600 23vw/.8 "Manrope";letter-spacing:-.1em;color:rgba(255,255,255,.07);pointer-events:none}
+    .quote-grid{position:relative;z-index:1;display:grid;grid-template-columns:5fr 7fr;gap:90px}
+    .quote h2{font:500 clamp(64px,8vw,128px)/1.15 "Manrope";letter-spacing:-.085em;text-transform:uppercase;margin-top:28px}
+    .quote h2 em{font-family:"Playfair Display";text-transform:none;font-weight:500}
+    .quote-left p{max-width:390px;margin-top:30px;font-size:14px;line-height:1.7;color:rgba(255,255,255,.72)}
+    .quote-form{background:var(--paper);color:var(--charcoal);padding:34px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{margin-bottom:14px}
+    .field label{display:block;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:transparent;padding:15px 14px;outline:none;color:var(--charcoal)}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--clay)}
+    .budget-box{display:grid;grid-template-columns:1fr auto;align-items:end;border-top:1px solid var(--line);margin-top:8px;padding-top:24px}
+    .budget-box span{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+    .budget-box strong{font:500 clamp(28px,4vw,52px)/1 "Manrope";letter-spacing:-.06em;color:var(--forest)}
+    .submit{margin-top:24px;width:100%;border:0;background:var(--forest);color:white;padding:18px;text-transform:uppercase;font-size:10px;letter-spacing:.16em;transition:.3s}
+    .submit:hover{background:var(--charcoal);transform:translateY(-2px)}
+    footer{position:relative;z-index:1;margin-top:100px;border-top:1px solid rgba(255,255,255,.35);padding-top:26px;display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+
+    .cursor{position:fixed;z-index:120;width:11px;height:11px;border-radius:50%;background:var(--clay);pointer-events:none;mix-blend-mode:difference;transform:translate(-50%,-50%)}
+    .cursor-ring{position:fixed;z-index:119;width:38px;height:38px;border:1px solid rgba(255,255,255,.65);border-radius:50%;pointer-events:none;mix-blend-mode:difference;transform:translate(-50%,-50%)}
+
+    @media(max-width:1440px){
+      .hero{min-height:680px}.hero-grid{padding:110px 34px 24px}.hero-orbit-label{width:110px;height:110px;right:5vw;top:22%}
+      .manifesto{padding:110px 34px 100px}.manifesto-grid{margin-top:60px;gap:40px}.manifesto-line{margin-top:60px}
+      .explode-copy{width:min(400px,36vw)}.explode-copy h2{margin:20px 0}.explode-index{margin-top:40px}
+      .models{padding:110px 34px 120px}.models-head{margin-bottom:60px;gap:40px}.model-stage{min-height:560px}.model-list{padding:30px 30px 30px 0}
+      .materials{padding:110px 0}.materials-head{padding-bottom:50px;gap:40px}.material-card{min-height:460px;height:60vh}
+      .process{padding:110px 34px 120px}.process-head{margin-bottom:60px;gap:40px}.conveyor{height:360px}
+      .process-item{width:150px;height:150px;padding:12px}.process-item .icon{width:42px;height:42px;font-size:18px}
+      .projects{padding:110px 34px 110px}.projects-head{margin-bottom:50px}.project-grid{grid-template-rows:440px 340px}
+      .quote{padding:110px 34px 40px}.quote-grid{gap:60px}
+    }
+    @media(max-width:980px){
+      header{grid-template-columns:1fr auto;padding:18px 20px}.nav{display:none}.hero-grid{padding:120px 20px 24px}.hero-copy{grid-column:1/11}.hero-bottom{grid-template-columns:1.8fr 1fr 1fr}.hero-bottom .stat:last-child{display:none}.hero-orbit-label{right:4vw;top:18%;width:100px;height:100px}.manifesto,.models,.process,.projects,.quote{padding-left:20px;padding-right:20px}.manifesto-grid,.models-head,.process-head,.quote-grid{grid-template-columns:1fr}.manifesto-side{display:none}.explode-copy{left:20px;width:44vw}.model-stage{grid-template-columns:1fr;min-height:960px}.model-list{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.models-intro,.materials-copy{justify-self:start}.materials-head{padding-left:20px;padding-right:20px;grid-template-columns:1fr}.material-rail{padding-left:20px}.material-card{width:62vw}.project-grid{grid-template-columns:1fr;grid-template-rows:600px 380px 380px}.project:nth-child(1){grid-row:auto}.quote-form{padding:26px}}
+    @media(max-width:700px){
+      .cursor,.cursor-ring{display:none}.header-cta{padding:10px 13px}.hero{min-height:760px}.hero-grid{grid-template-rows:1fr auto}.hero-copy{grid-column:1/13}.hero h1{font-size:18vw}.hero-bottom{grid-template-columns:1fr 1fr;gap:20px}.hero-lead{grid-column:1/3}.hero-bottom .stat:nth-of-type(2){display:none}.hero-orbit-label{display:none}.manifesto{padding-top:100px}.manifesto-grid{margin-top:50px}.explode{height:360vh}.explode-copy{top:18%;transform:none;width:calc(100% - 40px)}.explode-copy h2{font-size:15vw}.explode-copy p{display:none}.explode-index{margin-top:24px}.explode-step{padding:9px 0}.explode-meter{right:18px}.models{padding-top:100px}.models-head{margin-bottom:54px}.model-stage{min-height:880px}.model-option{grid-template-columns:40px 1fr auto}.model-option strong{font-size:24px}.model-ui{grid-template-columns:1fr 1fr;left:14px;right:14px}.materials{padding-top:100px}.material-card{width:82vw;height:58vh}.process{padding-top:100px}.conveyor{height:auto;border:0;display:grid;gap:12px}.conveyor-track{display:none}.process-item{position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:100%;height:150px;grid-template-columns:70px 1fr auto;text-align:left;place-items:center start}.project-grid{grid-template-rows:450px 300px 300px}.form-row{grid-template-columns:1fr}.quote{padding-top:100px}.quote-grid{gap:50px}footer{flex-direction:column;gap:12px}.scroll-cue{display:none}}
+  </style>
+</head>
+<body class="loading">
+  <div class="loader"><div class="loader-inner"><div class="loader-mark">Zenpod</div><div class="loader-bar"><span></span></div><small>assembling your space</small></div></div>
+  <div class="noise"></div>
+  <div class="cursor"></div><div class="cursor-ring"></div>
+
+  <header>
+    <a class="logo" href="#top">ZEN<span>POD</span></a>
+    <nav class="nav"><a href="#systems">Hệ module</a><a href="#materials">Vật liệu</a><a href="#projects">Công trình</a></nav>
+    <a class="header-cta" href="#quote">Nhận dự toán</a>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <canvas id="heroCanvas"></canvas>
+      <div class="hero-vignette"></div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Modular architecture / Vietnam</div>
+          <h1>Built in parts.<em>Lived as a whole.</em></h1>
+        </div>
+        <div class="hero-bottom">
+          <p class="hero-lead">Cabin và villa module được sản xuất chính xác tại nhà máy, vận chuyển nhanh và lắp đặt tại bất kỳ địa hình nào.</p>
+          <div class="stat"><b>45 ngày</b><span>Hoàn thiện trung bình</span></div>
+          <div class="stat"><b>80%</b><span>Sản xuất tại nhà máy</span></div>
+          <div class="stat"><b>20 năm</b><span>Tuổi thọ kết cấu</span></div>
+        </div>
+      </div>
+      <div class="hero-orbit-label"><span>Scroll to disassemble</span></div>
+      <div class="scroll-cue">Scroll to explore ↓</div>
+    </section>
+
+    <section class="manifesto">
+      <div class="section-tag">01 / Tư duy thiết kế</div>
+      <div class="manifesto-grid">
+        <p class="manifesto-side">Không gian tốt không cần xây lâu. Nó cần được tính đúng ngay từ đầu — từ từng milimet kết cấu đến cách ánh sáng đi qua căn phòng.</p>
+        <h2>Không xây một căn nhà. Chúng tôi tạo một <span>hệ không gian</span> có thể phát triển cùng bạn.</h2>
+      </div>
+      <div class="manifesto-line"></div>
+    </section>
+
+    <section class="explode" id="systems">
+      <div class="explode-sticky">
+        <canvas id="explodeCanvas"></canvas>
+        <div class="explode-shade"></div>
+        <div class="explode-copy">
+          <div class="section-tag" style="color:rgba(255,255,255,.55)">02 / Exploded system</div>
+          <h2>Một cabin.<br>Năm lớp.</h2>
+          <p>Mỗi thành phần được sản xuất riêng, kiểm tra độc lập rồi khóa vào nhau thành một hệ hoàn chỉnh.</p>
+          <div class="explode-index">
+            <div class="explode-step active"><small>01</small><b>Steel frame</b><span>Structure</span></div>
+            <div class="explode-step"><small>02</small><b>Thermal skin</b><span>Insulation</span></div>
+            <div class="explode-step"><small>03</small><b>Glass facade</b><span>Daylight</span></div>
+            <div class="explode-step"><small>04</small><b>Interior core</b><span>Living</span></div>
+            <div class="explode-step"><small>05</small><b>Roof shell</b><span>Protection</span></div>
+          </div>
+        </div>
+        <div class="explode-meter"><span></span></div>
+      </div>
+    </section>
+
+    <section class="models">
+      <div class="models-head">
+        <h2>Choose your <em>volume.</em></h2>
+        <p class="models-intro">Từ một studio giữa rừng đến villa module hoàn chỉnh. Mỗi mẫu có thể mở rộng, ghép đôi hoặc thay đổi mặt tiền theo vị trí triển khai.</p>
+      </div>
+      <div class="model-stage">
+        <div class="model-list">
+          <button class="model-option active" data-model="pod"><small>01</small><strong>Pod 18</strong><span>18 m²</span></button>
+          <button class="model-option" data-model="cabin"><small>02</small><strong>Cabin 24</strong><span>24 m²</span></button>
+          <button class="model-option" data-model="villa"><small>03</small><strong>Villa 36</strong><span>36 m²</span></button>
+          <button class="model-option" data-model="double"><small>04</small><strong>Double 48</strong><span>48 m²</span></button>
+        </div>
+        <div class="model-visual">
+          <canvas id="configCanvas"></canvas>
+          <div class="model-ui">
+            <div><span>Diện tích</span><b id="uiArea">18 m²</b></div>
+            <div><span>Phòng ngủ</span><b id="uiBed">01</b></div>
+            <div><span>Thi công</span><b id="uiTime">30–35 ngày</b></div>
+            <div><span>Từ</span><b id="uiPrice">690 triệu</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="materials" id="materials">
+      <div class="materials-head">
+        <h2>Touch the <em>outside.</em><br>Feel the inside.</h2>
+        <p class="materials-copy">Vật liệu ngoài trời chịu khí hậu nhiệt đới. Nội thất bên trong giữ cảm giác ấm, nhẹ và yên tĩnh như một căn nhà xây truyền thống.</p>
+      </div>
+      <div class="material-rail">
+        <article class="material-card"><img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=85" alt="Gỗ ngoại thất"><div class="material-info"><div><span>Facade 01</span><h3>Thermo Wood</h3></div><span>Warm / Durable</span></div></article>
+        <article class="material-card"><img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85" alt="Nội thất cabin"><div class="material-info"><div><span>Interior 02</span><h3>Oak Veneer</h3></div><span>Soft / Natural</span></div></article>
+        <article class="material-card"><img src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1200&q=85" alt="Kính cabin"><div class="material-info"><div><span>Envelope 03</span><h3>Low-E Glass</h3></div><span>Clear / Efficient</span></div></article>
+        <article class="material-card"><img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1200&q=85" alt="Vải nội thất"><div class="material-info"><div><span>Textile 04</span><h3>Natural Linen</h3></div><span>Calm / Tactile</span></div></article>
+      </div>
+    </section>
+
+    <section class="process">
+      <div class="process-head">
+        <h2>Factory to<br>forest.</h2>
+        <p class="process-copy">Thi công prefab không phải rút gọn chất lượng. Đó là chuyển phần lớn công việc vào môi trường được kiểm soát để giảm sai số, thời gian và rác thải tại công trường.</p>
+      </div>
+      <div class="conveyor">
+        <div class="conveyor-track"></div>
+        <div class="process-item"><div class="icon">⌁</div><div><small>01 / Week 01</small><b>Design</b></div><span>Định hình</span></div>
+        <div class="process-item"><div class="icon">⌗</div><div><small>02 / Week 02</small><b>Fabricate</b></div><span>Sản xuất</span></div>
+        <div class="process-item"><div class="icon">◎</div><div><small>03 / Week 04</small><b>Inspect</b></div><span>Kiểm định</span></div>
+        <div class="process-item"><div class="icon">→</div><div><small>04 / Week 05</small><b>Deliver</b></div><span>Vận chuyển</span></div>
+        <div class="process-item"><div class="icon">⌂</div><div><small>05 / Week 06</small><b>Install</b></div><span>Lắp đặt</span></div>
+      </div>
+    </section>
+
+    <section class="projects" id="projects">
+      <div class="projects-head"><h2>Placed in<br>nature.</h2><div class="projects-count">03 selected deployments</div></div>
+      <div class="project-grid">
+        <article class="project"><img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1600&q=88" alt="Cabin Đà Lạt"><div class="project-meta"><h3>Pine Ridge Cabin</h3><span>Đà Lạt / 36 m²</span></div></article>
+        <article class="project"><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=88" alt="Cabin Hòa Bình"><div class="project-meta"><h3>Lake Double Pod</h3><span>Hòa Bình / 48 m²</span></div></article>
+        <article class="project"><img src="https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1200&q=88" alt="Cabin Hội An"><div class="project-meta"><h3>Garden Studio</h3><span>Hội An / 24 m²</span></div></article>
+      </div>
+    </section>
+
+    <section class="quote" id="quote">
+      <div class="quote-grid">
+        <div class="quote-left"><div class="section-tag" style="color:rgba(255,255,255,.72)">06 / Start your pod</div><h2>Một khu đất.<br>Một <em>khả năng mới.</em></h2><p>Chọn loại module và quy mô. Hệ thống sẽ đưa ra khoảng đầu tư ban đầu để đội ngũ ZENPOD tư vấn phương án phù hợp.</p></div>
+        <form class="quote-form" onsubmit="event.preventDefault(); this.querySelector('.submit').textContent='Đã gửi yêu cầu ✓';">
+          <div class="form-row">
+            <div class="field"><label>Loại module</label><select id="quoteModel"><option value="690">Pod 18</option><option value="890">Cabin 24</option><option value="1290">Villa 36</option><option value="1690">Double 48</option></select></div>
+            <div class="field"><label>Số lượng</label><input id="quoteQty" type="number" min="1" value="1"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Địa điểm triển khai</label><input placeholder="Ví dụ: Đà Lạt, Lâm Đồng"></div>
+            <div class="field"><label>Mục đích</label><select><option>Homestay / Resort</option><option>Nhà ở cá nhân</option><option>Văn phòng</option><option>Kiosk thương mại</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Họ và tên</label><input required placeholder="Tên của bạn"></div>
+            <div class="field"><label>Số điện thoại</label><input required placeholder="09xx xxx xxx"></div>
+          </div>
+          <div class="field"><label>Ghi chú</label><textarea rows="4" placeholder="Diện tích đất, tiến độ mong muốn hoặc yêu cầu riêng..."></textarea></div>
+          <div class="budget-box"><div><span>Ngân sách tham khảo</span><strong id="quoteBudget">690–790 triệu</strong></div><span>Chưa gồm nền móng & vận chuyển</span></div>
+          <button class="submit" type="submit">Nhận phương án sơ bộ</button>
+        </form>
+      </div>
+      <footer><span>© 2026 Zenpod Modular Architecture</span><span>Đà Nẵng · Việt Nam</span><span>hello@zenpod.vn · 0905 000 000</span></footer>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+    const lenis = new Lenis({duration:0.95,smoothWheel:true});
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t=>lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+
+    const cursor=document.querySelector('.cursor'), ring=document.querySelector('.cursor-ring');
+    if(matchMedia('(pointer:fine)').matches){
+      window.addEventListener('mousemove',e=>{gsap.to(cursor,{x:e.clientX,y:e.clientY,duration:.12});gsap.to(ring,{x:e.clientX,y:e.clientY,duration:.5,ease:'power3.out'})});
+    }
+
+    const mm=(v)=>window.innerWidth<700?v*.72:v;
+    const colors={forest:0x19352f, clay:0xb64f36, sand:0xece3d1, wood:0x8c5a3b, dark:0x1d2320, glass:0x9ec2c0, metal:0x59615c, cream:0xd9ceb9};
+
+    const io = new IntersectionObserver(e => e.forEach(x => x.target._active = x.isIntersecting));
+    function makeRenderer(canvas,alpha=true){
+      const dpr = window.devicePixelRatio || 1;
+      const r=new THREE.WebGLRenderer({canvas,antialias:dpr<2,alpha,powerPreference:'high-performance'});
+      r.setPixelRatio(Math.min(dpr, 1.5));
+      r.outputEncoding=THREE.sRGBEncoding;
+      r.shadowMap.enabled=true;
+      r.shadowMap.type=THREE.PCFSoftShadowMap;
+      io.observe(canvas);
+      canvas._active = true;
+      return r;
+    }
+    function addLights(scene){
+      scene.add(new THREE.HemisphereLight(0xf3eadc,0x15231f,1.5));
+      const key=new THREE.DirectionalLight(0xffffff,2.1);key.position.set(5,8,6);key.castShadow=true;scene.add(key);
+      const rim=new THREE.DirectionalLight(0xb64f36,1.2);rim.position.set(-6,4,-3);scene.add(rim);
+    }
+    function mat(color,rough=.58,metal=.05,transparent=false,opacity=1){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,transparent,opacity,side:THREE.DoubleSide})}
+    function box(w,h,d,color,x,y,z,name,materialOverride){const g=new THREE.BoxGeometry(w,h,d);const m=materialOverride||mat(color);const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;o.name=name;return o}
+
+    function buildCabin(scale=1){
+      const group=new THREE.Group();
+      const parts=[];
+      const add=o=>{group.add(o);parts.push(o);return o};
+      add(box(5.9,0.22,3.6,colors.dark,0,0,0,'foundation'));
+      add(box(6.7,0.18,4.8,colors.wood,0,-.12,.4,'deck'));
+      add(box(.18,2.7,3.6,colors.cream,-2.86,1.45,0,'leftWall'));
+      add(box(.18,2.7,3.6,colors.cream,2.86,1.45,0,'rightWall'));
+      add(box(5.9,2.7,.18,colors.cream,0,1.45,-1.71,'backWall'));
+      const glassMat=mat(colors.glass,.15,.15,true,.48);
+      add(box(5.2,2.35,.08,colors.glass,0,1.45,1.73,'glass',glassMat));
+      add(box(.12,2.6,.12,colors.dark,-1.85,1.45,1.77,'frame1'));
+      add(box(.12,2.6,.12,colors.dark,0,1.45,1.77,'frame2'));
+      add(box(.12,2.6,.12,colors.dark,1.85,1.45,1.77,'frame3'));
+      const roof=add(box(6.4,.28,4.1,colors.dark,0,3.0,0,'roof'));roof.rotation.z=-.03;
+      add(box(2.1,.42,1.15,0x6d756e,-1.25,.34,.15,'sofa'));
+      add(box(1.05,.16,.7,colors.wood,-1.25,.35,1.05,'table'));
+      add(box(1.45,.72,1.9,0xd9d0c1,1.45,.46,-.35,'bed'));
+      const post1=add(box(.14,1.1,.14,colors.dark,-2.8,.55,2.15,'post1'));
+      const post2=add(box(.14,1.1,.14,colors.dark,2.8,.55,2.15,'post2'));
+      const awning=add(box(5.8,.12,1.1,colors.wood,0,1.13,2.18,'awning'));
+      group.scale.setScalar(scale);
+      return {group,parts};
+    }
+
+    // HERO SCENE
+    const heroCanvas=document.querySelector('#heroCanvas');
+    const heroRenderer=makeRenderer(heroCanvas,true); const heroScene=new THREE.Scene();
+    heroScene.fog=new THREE.FogExp2(0x19352f,.045); addLights(heroScene);
+    const heroCamera=new THREE.PerspectiveCamera(36,1,.1,100);heroCamera.position.set(9,5.6,10.5);heroCamera.lookAt(0,1,0);
+    const ground=box(26,.1,22,0x233e36,0,-.38,0,'ground',mat(0x233e36,.92));heroScene.add(ground);
+    const heroBuild=buildCabin(1.05);heroScene.add(heroBuild.group);heroBuild.group.position.set(1.5,0,0);heroBuild.group.rotation.y=-.35;
+    const original=heroBuild.parts.map(p=>({p,x:p.position.x,y:p.position.y,z:p.position.z,rx:p.rotation.x,ry:p.rotation.y,rz:p.rotation.z}));
+    original.forEach((o,i)=>{o.p.position.set(o.x+(i%2?10:-10),o.y+5+(i%4)*1.5,o.z+(i%3-1)*8);o.p.rotation.set(Math.random()*2,Math.random()*2,Math.random()*2);o.p.scale.set(.35,.35,.35)});
+    const loaderBar=document.querySelector('.loader-bar span');
+    const intro=gsap.timeline({defaults:{ease:'power3.inOut'}});
+    intro.to(loaderBar,{width:'100%',duration:1.1})
+      .to('.loader',{opacity:0,duration:.65,onComplete:()=>{document.querySelector('.loader').classList.add('hide');document.body.classList.remove('loading')}});
+    [...original].reverse().forEach((o,i)=>{
+      const at=1.05+i*.055;
+      intro.to(o.p.position,{x:o.x,y:o.y,z:o.z,duration:1.55,ease:'expo.inOut'},at)
+           .to(o.p.rotation,{x:o.rx,y:o.ry,z:o.rz,duration:1.55,ease:'expo.inOut'},at)
+           .to(o.p.scale,{x:1,y:1,z:1,duration:1.25,ease:'expo.inOut'},at+.08);
+    });
+    intro.from('.hero-copy>*',{y:70,opacity:0,stagger:.12,duration:1},1.75)
+         .from('.hero-bottom>*',{y:30,opacity:0,stagger:.09,duration:.8},2.05);
+
+    let mouseX=0,mouseY=0;window.addEventListener('mousemove',e=>{mouseX=(e.clientX/innerWidth-.5);mouseY=(e.clientY/innerHeight-.5)});
+    function resizeRenderer(renderer,camera,canvas){const w=canvas.clientWidth,h=canvas.clientHeight;if(canvas.width!==w*renderer.getPixelRatio()||canvas.height!==h*renderer.getPixelRatio()){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
+    function renderHero(){if(heroCanvas._active){resizeRenderer(heroRenderer,heroCamera,heroCanvas);heroBuild.group.rotation.y+=((-.35+mouseX*.18)-heroBuild.group.rotation.y)*.03;heroBuild.group.rotation.x+=((-mouseY*.035)-heroBuild.group.rotation.x)*.03;heroRenderer.render(heroScene,heroCamera);}requestAnimationFrame(renderHero)}renderHero();
+
+    // EXPLODED SCENE
+    const exCanvas=document.querySelector('#explodeCanvas'); const exRenderer=makeRenderer(exCanvas,true); const exScene=new THREE.Scene();exScene.background=new THREE.Color(colors.dark);exScene.fog=new THREE.FogExp2(colors.dark,.025);addLights(exScene);
+    const exCamera=new THREE.PerspectiveCamera(33,1,.1,100);exCamera.position.set(9,4.8,10);exCamera.lookAt(0,1.2,0);
+    const exBuild=buildCabin(1.12);exScene.add(exBuild.group);exBuild.group.position.x=2.1;exBuild.group.rotation.y=-.46;
+    const targetOffsets={foundation:[0,-2.8,0],deck:[0,-1.6,0],leftWall:[-3.8,0,0],rightWall:[3.8,0,0],backWall:[0,0,-3.4],glass:[0,0,3.4],frame1:[0,0,3.4],frame2:[0,0,3.4],frame3:[0,0,3.4],roof:[0,3.4,0],sofa:[-1.5,0,0],table:[0,0,1.8],bed:[1.8,0,-.6],post1:[-2,0,2.5],post2:[2,0,2.5],awning:[0,1.4,3.1]};
+    const exOrigin=exBuild.parts.map(p=>({p,pos:p.position.clone()}));
+    gsap.to('.explode-meter span',{height:'100%',ease:'none',scrollTrigger:{trigger:'.explode',start:'top top',end:'bottom bottom',scrub:true}});
+    const steps=[...document.querySelectorAll('.explode-step')];
+    ScrollTrigger.create({trigger:'.explode',start:'top top',end:'bottom bottom',scrub:true,onUpdate:self=>{
+      const p=self.progress;const idx=Math.min(4,Math.floor(p*5));steps.forEach((s,i)=>s.classList.toggle('active',i===idx));
+      exOrigin.forEach(o=>{const off=targetOffsets[o.p.name]||[0,0,0];const local=Math.max(0,Math.min(1,(p-.06)/.82));const eased=local*local*(3-2*local);o.p.position.set(o.pos.x+off[0]*eased,o.pos.y+off[1]*eased,o.pos.z+off[2]*eased)});
+      exBuild.group.rotation.y=-.46+p*.75;exCamera.position.x=9-p*1.8;exCamera.lookAt(1.3,1.1,0);
+    }});
+    function renderExplode(){if(exCanvas._active){resizeRenderer(exRenderer,exCamera,exCanvas);exRenderer.render(exScene,exCamera);}requestAnimationFrame(renderExplode)}renderExplode();
+
+    // CONFIGURATOR SCENE
+    const cfgCanvas=document.querySelector('#configCanvas');const cfgRenderer=makeRenderer(cfgCanvas,true);const cfgScene=new THREE.Scene();addLights(cfgScene);
+    const cfgCamera=new THREE.PerspectiveCamera(34,1,.1,100);cfgCamera.position.set(8,5.5,9);cfgCamera.lookAt(0,1,0);
+    const cfgGround=box(18,.12,14,0xd9cfbb,0,-.4,0,'ground',mat(0xd9cfbb,.95));cfgScene.add(cfgGround);
+    let cfgBuild=buildCabin(.86);cfgScene.add(cfgBuild.group);cfgBuild.group.rotation.y=-.45;
+    const configs={pod:{sx:.85,sz:.82,area:'18 m²',bed:'01',time:'30–35 ngày',price:'690 triệu'},cabin:{sx:1.05,sz:.95,area:'24 m²',bed:'01',time:'35–40 ngày',price:'890 triệu'},villa:{sx:1.28,sz:1.08,area:'36 m²',bed:'02',time:'40–45 ngày',price:'1,29 tỷ'},double:{sx:1.62,sz:1.12,area:'48 m²',bed:'02',time:'45–55 ngày',price:'1,69 tỷ'}};
+    const uiArea=document.querySelector('#uiArea'),uiBed=document.querySelector('#uiBed'),uiTime=document.querySelector('#uiTime'),uiPrice=document.querySelector('#uiPrice');
+    document.querySelectorAll('.model-option').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.model-option').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const c=configs[btn.dataset.model];
+      gsap.to(cfgBuild.group.scale,{x:c.sx,y:1,z:c.sz,duration:.8,ease:'expo.inOut'});gsap.fromTo(cfgBuild.group.rotation,{y:-1.2},{y:-.45,duration:1,ease:'expo.out'});
+      gsap.to(['#uiArea','#uiBed','#uiTime','#uiPrice'],{opacity:0,y:8,duration:.2,onComplete:()=>{uiArea.textContent=c.area;uiBed.textContent=c.bed;uiTime.textContent=c.time;uiPrice.textContent=c.price;gsap.to(['#uiArea','#uiBed','#uiTime','#uiPrice'],{opacity:1,y:0,duration:.35})}})
+    }));
+    function renderCfg(){if(cfgCanvas._active){resizeRenderer(cfgRenderer,cfgCamera,cfgCanvas);cfgBuild.group.rotation.y+=.0015;cfgRenderer.render(cfgScene,cfgCamera);}requestAnimationFrame(renderCfg)}renderCfg();
+
+    // GENERAL MOTION
+    gsap.from('.manifesto h2',{y:100,opacity:0,duration:1.1,scrollTrigger:{trigger:'.manifesto',start:'top 70%'}});
+    gsap.from('.manifesto-line',{scaleX:0,duration:1.3,scrollTrigger:{trigger:'.manifesto-line',start:'top 90%'}});
+    gsap.from('.model-option',{x:-50,opacity:0,stagger:.08,scrollTrigger:{trigger:'.model-list',start:'top 70%'}});
+    const rail=document.querySelector('.material-rail');
+    gsap.to(rail,{x:()=>-(rail.scrollWidth-innerWidth+34),ease:'none',scrollTrigger:{trigger:'.materials',start:'top top',end:()=>'+='+(rail.scrollWidth-innerWidth),pin:true,scrub:1,invalidateOnRefresh:true}});
+    gsap.from('.process-item',{y:90,opacity:0,stagger:.1,scrollTrigger:{trigger:'.conveyor',start:'top 72%'}});
+    gsap.from('.project',{clipPath:'inset(100% 0 0 0)',stagger:.12,duration:1.1,ease:'power4.out',scrollTrigger:{trigger:'.project-grid',start:'top 72%'}});
+
+    const qModel=document.querySelector('#quoteModel'),qQty=document.querySelector('#quoteQty'),qBudget=document.querySelector('#quoteBudget');
+    function updateBudget(){const base=+qModel.value,qty=Math.max(1,+qQty.value||1);const low=base*qty,high=Math.round(low*1.14);const f=n=>n>=1000?(n/1000).toFixed(2).replace('.',',')+' tỷ':n+' triệu';qBudget.textContent=`${f(low)}–${f(high)}`}
+    qModel.addEventListener('change',updateBudget);qQty.addEventListener('input',updateBudget);
+
+    window.addEventListener('resize',()=>ScrollTrigger.refresh());
+  </script>
+</body>
+</html>
